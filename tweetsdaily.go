@@ -9,6 +9,7 @@ import (
 )
 
 const listUrl = "https://my.oschina.net/xxiaobian"
+const addCommentUrl = "https://my.oschina.net/space/blog/add_comment"
 const dataFile = "../data/id.txt"
 
 type TwittersDaily struct {
@@ -26,7 +27,7 @@ func (t *TwittersDaily) GetRemote() ([]string, error) {
 		return nil, err
 	}
 
-	re := regexp.MustCompile(`https://my\.oschina\.net/xxiaobian/blog/(\d+)`)
+	re := regexp.MustCompile(listUrl + `/blog/(\d+)`)
 	matches := re.FindStringSubmatch(content)
 
 	if matches == nil {
@@ -51,7 +52,7 @@ func (t *TwittersDaily) GetLocal() ([]string, error) {
 }
 
 func (t TwittersDaily) makeArtilceUrl(id string) string {
-	return fmt.Sprintf("https://my.oschina.net/xxiaobian/blog/%s", id)
+	return fmt.Sprintf("%s/blog/%s", listUrl, id)
 }
 
 func (t *TwittersDaily) UpdateLocal(id []byte) error {
@@ -60,4 +61,8 @@ func (t *TwittersDaily) UpdateLocal(id []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (t *TwittersDaily) SendComment(id string, content string) error {
+	return t.c.SendComment(id, content)
 }

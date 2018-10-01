@@ -2,14 +2,10 @@ package test
 
 import (
 	tf "github.com/falconchen/tweets-daily-farseer"
+	"github.com/gpmgo/gopm/modules/log"
 	"regexp"
 	"testing"
 )
-
-type testClients struct {
-	client *tf.Client
-	ip     string
-}
 
 func TestDownload(t *testing.T) {
 
@@ -40,21 +36,42 @@ func TestDownload(t *testing.T) {
 			proxyClient,
 		}
 
+		ips := make([]string, len(clientsGroup))
 		t.Log("Check downloaders' ip")
 		{
 			for i, c := range clientsGroup {
 				resp, err := c.Get("https://ip.cn")
+
 				if err != nil {
 					t.Errorf("fetch error: %s", err.Error())
 				}
+
 				reg := regexp.MustCompile(`\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}`)
 
 				//ip := reg.FindAllString(resp, -1)
 
 				ip := reg.FindString(resp)
+				if ip == "" {
+					t.Fatalf("clent %d ip not found ", i)
+				}
+				ips[i] = ip
 				t.Logf("%T,%v", ip, ip)
 				t.Logf("===finish client %d test\n", i+1)
 
+			}
+		}
+
+		t.Log("Compare ips")
+		{
+			var preIp string
+			for i, ip := range ips {
+				if i == 0 {
+					preIp = ip
+					continue
+				}
+				if preIp == ip {
+					log.Error("proxy not valid")
+				}
 			}
 		}
 
