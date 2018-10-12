@@ -22,7 +22,7 @@ type Client struct {
 /// Init client structure
 func NewClient() *Client {
 	return &Client{
-		client: &http.Client{Timeout: 10 * time.Second},
+		client: &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -86,7 +86,7 @@ func setCommonHeaders(req *http.Request) {
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36")
 }
 
-func (c *Client) SendComment(id string, content string) error {
+func (c *Client) SendComment(id string, content string, cookieStr string) error {
 
 	data := map[string]interface{}{"blog": id, "content": content}
 
@@ -98,11 +98,10 @@ func (c *Client) SendComment(id string, content string) error {
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Add("Connection", "keep-alive")
-	req.Header.Add("Cookie", "_user_behavior_=f593857c-23a6-4e1c-b6de-d85330da3d23; Hm_lvt_a411c4d1664dd70048ee98afe7b28f0b=1536028574; oscid=V1RqlbaVAFpbxBsxcj3XptlomrvkuzuqTuy22x0pRNcaDvaWxvhwXL6IWpMgqhjF0dXpy%2F0QeK8f6JvThBgPaqp0QURJalk3vyzpbEkNKm1svLrF37W8RzyhDUqigfz%2FHpok3jQZ9bhFlYz58nZGBYp6diZh4QE7JEZEggF1Jbw%3D; Hm_lvt_cb47adfe0fabd7059a2a90a495077efe=1538147391,1538286249,1538286341,1538288930; Hm_lvt_d237257153dcc02ba4647b448cbafcb8=1535951354; Hm_lpvt_a411c4d1664dd70048ee98afe7b28f0b=1538288926; aliyungf_tc=AQAAAJ5jAmYvxwYAyljleJtPVLrqlF/X; Hm_lpvt_cb47adfe0fabd7059a2a90a495077efe=1538368874")
+	req.Header.Add("Cookie", cookieStr)
 	req.Header.Add("X-Requested-With", "XMLHttpRequest")
 
 	setCommonHeaders(req)
-
 	resp, err := c.client.Do(req)
 
 	if err != nil {

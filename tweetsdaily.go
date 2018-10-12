@@ -6,18 +6,22 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 )
 
 const listUrl = "https://my.oschina.net/xxiaobian"
+
+//const listUrl = "https://my.oschina.net/falcon10086"
 const addCommentUrl = "https://my.oschina.net/space/blog/add_comment"
 const dataFile = "../data/id.txt"
 
 type TwittersDaily struct {
-	c *Client
+	c         *Client
+	cookieStr string
 }
 
-func New(c *Client) *TwittersDaily {
-	return &TwittersDaily{c}
+func New(c *Client, cookieStr string) *TwittersDaily {
+	return &TwittersDaily{c, cookieStr}
 }
 
 //
@@ -40,7 +44,8 @@ func (t *TwittersDaily) GetLocal() ([]string, error) {
 
 	data, err := ioutil.ReadFile(dataFile)
 	if err != nil {
-		fmt.Print(err)
+		return nil, err
+		//fmt.Print(err)
 	}
 
 	id := string(data)
@@ -63,6 +68,20 @@ func (t *TwittersDaily) UpdateLocal(id []byte) error {
 	return nil
 }
 
+func (t *TwittersDaily) SetCookieStr(cookieStr string) {
+	t.cookieStr = cookieStr
+}
+
+func (t *TwittersDaily) CheckShafaExists(id string) (bool, error) {
+
+	content, err := t.c.Get(t.makeArtilceUrl(id))
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(content, "data-comment-id="), nil
+
+}
+
 func (t *TwittersDaily) SendComment(id string, content string) error {
-	return t.c.SendComment(id, content)
+	return t.c.SendComment(id, content, t.cookieStr)
 }
